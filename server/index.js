@@ -3,25 +3,24 @@ const app = express()                 // express 메소드를 이용해 새로�
 const port = 5000       
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const config = require('./config/key');
 const { auth } = require('./middleware/auth');
 const { User } = require("./models/Use");
-
-const config = require('./config/key');
 
 app.use(bodyParser.urlencoded({extended: true}));   
 
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-const mongoose = require('mongoose');
 const Use = require('./models/Use');
+const mongoose = require('mongoose');
 mongoose.connect(config.mongoURI, {
     useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false  // 에러가 발생하는 것을 막아준다.
 }).then(() => console.log('MongoDB Connected...'))
   .catch(err => console.log(err))
 
 
-app.get('/', (req, res) => {
+app.get('/api/hello', (req, res) => {
   res.send('Hello World!')
 })
 
@@ -72,9 +71,8 @@ app.post('/api/users/login', (req, res) => {
 
 // role 1 어드민    role 2 특정 부서 어드민
 // role 0 -> 일반유저    role 0이 아니면 관리자
-
 app.get('/api/users/auth', auth, (req, res) => {
-
+  // 여기까지 미들웨어를 통과해왔다는 얘기는 Authentication이 True라는 말
   res.status(200).json({
     _id: req.user._id,
     isAdmin: req.user.role === 0 ? false : true,
